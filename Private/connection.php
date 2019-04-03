@@ -1,6 +1,6 @@
 <?php
 
-$dsn = 'mysql:host=localhost;port=3306;dbname=webshop;charset=utf8';
+$dsn = 'mysql:host=localhost;dbname=webchess;charset=utf8';
 $user = 'user';
 $password = 'qwe123';//Skaffa bättra lösenord
 $options = [

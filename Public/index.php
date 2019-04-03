@@ -10,6 +10,7 @@ if(!$dbh)
 
 <head>
 	<meta charset="utf-8"/>
+	<link rel="stylesheet" href="../index.css"/>
 </head>
 
 <body>
@@ -23,7 +24,7 @@ if(!$dbh)
 	}
 	
 	echo '<p>Pågående partier</p>';
-	$sql = "SELECT FEN, ImageURL, BlackUserID, WhiteUserID FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
+	$sql = "SELECT ID, FEN, ImageURL, BlackUserID, WhiteUserID FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
 	$stmt = $dbh->query($sql);
 	if(!$stmt)
 		die();
@@ -32,15 +33,21 @@ if(!$dbh)
 	foreach($stmt as $row){
 		if($counter >= 3)
 			break;
+		echo "<div>";
 		
-		echo htmlspecialchars("<img src=\"{$row['ImageURL']}\" alt=\"FEN-Sträng av partiet: {$row['FEN']}\"/>");
+		$imageURL = htmlspecialchars($row['ImageURL']);
+		$fen = htmlspecialchars($row['FEN']);
+		echo "<img src=\"{$imageURL}\" alt=\"FEN-Sträng av partiet: {$fen}\"/>";
 		$sql = "SELECT Username, ELORating FROM Users WHERE ID=? OR ID=?";
 		$playerstmt = $dbh->prepare($sql);
 		$playerstmt->execute([$row['WhiteUserID'], $row['BlackUserID']]);
 		$players = $playerstmt->fetchAll();
 		
 		
-		echo htmlspecialchars("<p>{}</p>");
+		echo "<p>{$row['ID']}</p>";
+		echo '<p><a href="">Titta på</a></p>';
+		
+		echo "</div>";
 		
 		$counter++;
 	}
