@@ -20,11 +20,12 @@ if(!$dbh)
 		//Kolla om man är admin
 	}
 	else{
-		echo '<a href="login.php">Logga in / Registrera</a>';
+		echo '<a href="login.php" class="login">Logga in / Registrera</a>';
 	}
-	
-	echo '<p>Pågående partier</p>';
-	$sql = "SELECT ID, FEN, ImageURL, BlackUserID, WhiteUserID FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
+	?>
+	<p class="ongoing">Pågående partier</p>;
+	<?php
+	$sql = "SELECT FEN, ImageURL, BlackUserID, WhiteUserID FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
 	$stmt = $dbh->query($sql);
 	if(!$stmt)
 		die();
@@ -38,21 +39,24 @@ if(!$dbh)
 		$imageURL = htmlspecialchars($row['ImageURL']);
 		$fen = htmlspecialchars($row['FEN']);
 		echo "<img src=\"{$imageURL}\" alt=\"FEN-Sträng av partiet: {$fen}\"/>";
-		$sql = "SELECT Username, ELORating FROM Users WHERE ID=? OR ID=?";
+		$sql = "SELECT Username, ELORating FROM Users WHERE ID=?";
+		
 		$playerstmt = $dbh->prepare($sql);
-		$playerstmt->execute([$row['WhiteUserID'], $row['BlackUserID']]);
-		$players = $playerstmt->fetchAll();
+		$playerstmt->execute([$row['WhiteUserID']]);
+		$whitePlayer = $playerstmt->fetch();
 		
+		$playerstmt = $dbh->prepare($sql);
+		$playerstmt->execute([$row['BlackUserID']]);
+		$blackPlayer = $playerstmt->fetch();
 		
-		echo "<p>{$row['ID']}</p>";
-		echo '<p><a href="">Titta på</a></p>';
+		echo '<p>'.htmlspecialchars($whitePlayer['Username']).' (ELO '.htmlspecialchars($whitePlayer['ELORating']).
+		') VS '.htmlspecialchars($blackPlayer['Username']).' (ELO '.htmlspecialchars($blackPlayer['ELORating']).')</p>';
+		echo '<p class="watch"><a href="">Titta på</a></p>';
 		
 		echo "</div>";
 		
 		$counter++;
 	}
-	
-	//Bilder på partier
 	?>
 </body>
 
