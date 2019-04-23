@@ -1,0 +1,27 @@
+Korrektioner
+
+[Users]
+- 'Password', VARCHAR, 255
+- 'Email', VARCHAR, 64
+
+[Games]
+- 'Fen', VARCHAR, 128
+- 'ImageURL', VARCHAR, 192
+- 'BlackUserID', SMALLINT, UNSIGNED, FK
+- 'WhiteUserID', SMALLINT, UNSIGNED, FK
+
+[SavedGames]
+- 'UserID', SMALLINT, UNSIGNED, FK
+- 'GameID', SMALLINT, UNSIGNED, FK
+
+[BannedIPs]
+- 'IP', VARCHAR, 128, PK
+
+[BannedUsers]
+- 'UserID', SMALLINT, UNSIGNED, FK
+
+[NonActivatedUsers]
+- 'ID', SMALLINT, UNSIGNED, PK
+- 'Password', VARCHAR, 255
+- 'Email', VARCHAR, 64
+(NEW) - 'token', VARCHAR, 64, UNIQUE

@@ -4,18 +4,19 @@ require "../Private/connection.php";
 
 if(!$dbh)
 	die();
+
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="sv">
 
 <head>
 	<meta charset="utf-8"/>
-	<link rel="stylesheet" href="../index.css"/>
+	<link rel="stylesheet" href="/CSS/index.css"/>
 </head>
 
 <body>
 	<?php
-	session_start();
 	if(isset($_SESSION['username'])){
 		//Kolla om man är admin
 	}
