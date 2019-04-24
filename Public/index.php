@@ -6,6 +6,10 @@ if(!$dbh)
 	die();
 
 session_start();
+if(isset($_SESSION['username']) && isset($_SESSION['userid']))
+	$loggedIn = true;
+else
+	$loggedIn = false;
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -17,12 +21,12 @@ session_start();
 
 <body>
 	<?php
-	if(isset($_SESSION['username'])){
+	if($loggedIn){
 		//Kolla om man är admin
 		$htmlUsername = htmlspecialchars($_SESSION['username']);
 		echo "<p class=\"userinfo\">Inloggad som: <a href=\"http://localhost/account.php\">{$htmlUsername}</a></p>";
-		echo '<a href="http://localhost/manage-challenges.php" class="userinfo">Hantera utmaningar</a>';
-		echo '<a href="http://localhost/saved-games.php" class="userinfo">Sparade partier</a>';
+		echo '<p class="userinfo"><a href="http://localhost/manage-challenges.php">Hantera utmaningar</a></p>';
+		echo '<p class="userinfo"><a href="http://localhost/saved-games.php">Sparade partier</a></p>';
 	}
 	else{
 		echo '<a href="login.php" class="login">Logga in / Registrera</a>';
@@ -62,6 +66,39 @@ session_start();
 		
 		$counter++;
 	}
+	echo '<br>';
+	
+	if($loggedIn)
+	{
+		echo '<p>Mina pågående partier:</p>';
+		$sql = "SELECT fen, imageurl, blackuserid, whiteuserid FROM games WHERE whiteuserid = ? OR blackuserid = ?";
+		$stmt = $dbh->prepare($sql);
+		$stmt->execute([$_SESSION['userid'], $_SESSION['userid']]);
+		$games = $stmt->fetchAll();
+		foreach($games as $row){
+			echo '<div>';
+			
+			$imageURL = htmlspecialchars($row['imageurl']);
+			$fen = htmlspecialchars($row['fen']);
+			echo "<img src=\"{$imageURL}\" alt=\"FEN-Sträng av partiet: {$fen}\" />";
+			
+			$sql = "SELECT username, elorating FROM users WHERE id=?";
+			$stmt = $dbh->prepare($sql);
+			$stmt->execute([$row['whiteuserid']]);
+			$whitePlayer = $stmt->fetch();
+			
+			$stmt = $dbh->prepare($sql);
+			$stmt->execute([$row['blackuserid']]);
+			$blackPlayer = $stmt->fetch();
+			
+			echo '<p>'.htmlspecialchars($whitePlayer['username']).' (ELO '.htmlspecialchars($whitePlayer['elorating']).
+			') VS '.htmlspecialchars($blackPlayer['username']).' (ELO '.htmlspecialchars($blackPlayer['elorating']).')</p>';
+			echo '<p class="play"><a href="">Spela</a></p>';
+			
+			echo '</div>';
+		}
+	}
+	
 	?>
 </body>
 

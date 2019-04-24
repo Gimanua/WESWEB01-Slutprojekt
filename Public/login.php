@@ -64,19 +64,23 @@ function Login($dbh, $username, $password)
 	}
 	*/
 	
-	$sql = "SELECT password FROM `users` WHERE username = ?";
+	$sql = "SELECT id, password FROM `users` WHERE username = ?";
 	$stmt = $dbh->prepare($sql);
-	$stmt->execute([$username]);
-	$hashedPassword = $stmt->fetchColumn();
-	if(!$hashedPassword)
+	$success = $stmt->execute([$username]);
+	if(!$success)
 	{
 		echo "Felaktigt användarnamn";
 		return;
 	}
+	$row = $stmt->fetch();
+	$hashedPassword = $row['password'];
+	$userid = $row['id'];
+	
 	if(password_verify($password, $hashedPassword))
 	{
 		echo "Inloggningen lyckades";
 		$_SESSION['username'] = $username;
+		$_SESSION['userid'] = $userid;
 	}
 	else
 	{

@@ -11,8 +11,9 @@ div{
 
 .userinfo{
 	float:right;
-	width:30vw;
 	background-color:cyan;
+	border: solid;
+	margin-left:0.1vw;
 }
 
 p{
