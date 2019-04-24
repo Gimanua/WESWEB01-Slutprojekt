@@ -19,6 +19,10 @@ session_start();
 	<?php
 	if(isset($_SESSION['username'])){
 		//Kolla om man är admin
+		$htmlUsername = htmlspecialchars($_SESSION['username']);
+		echo "<p class=\"userinfo\">Inloggad som: <a href=\"http://localhost/account.php\">{$htmlUsername}</a></p>";
+		echo '<a href="http://localhost/manage-challenges.php" class="userinfo">Hantera utmaningar</a>';
+		echo '<a href="http://localhost/saved-games.php" class="userinfo">Sparade partier</a>';
 	}
 	else{
 		echo '<a href="login.php" class="login">Logga in / Registrera</a>';

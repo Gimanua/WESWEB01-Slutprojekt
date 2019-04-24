@@ -9,6 +9,12 @@ div{
 	margin-right:1vw;
 }
 
+.userinfo{
+	float:right;
+	width:30vw;
+	background-color:cyan;
+}
+
 p{
 	text-align:center;
 }

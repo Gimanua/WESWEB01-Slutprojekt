@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Värd: 127.0.0.1
--- Tid vid skapande: 23 apr 2019 kl 21:26
+-- Tid vid skapande: 24 apr 2019 kl 12:18
 -- Serverversion: 10.1.35-MariaDB
 -- PHP-version: 7.2.9
 
@@ -107,7 +107,7 @@ CREATE TABLE `nonactivatedusers` (
 --
 
 INSERT INTO `nonactivatedusers` (`id`, `username`, `password`, `email`, `activationvalid`, `token`) VALUES
-(3, 'Gimanua', '$2y$10$WW6/eACrJFUOqw3OJAcImOBLnDtUIqxWxOuEs0VohMmVd4Mtf1N9i', 'gimanua.dota2@gmail.com', '2019-04-23 19:28:36', '407e80009db34df8179205fde022f7e5');
+(4, 'Muppson', '$2y$10$PEkDSrS3wLwCcqVwceMoC.UcYCzMje.ME3MNhKbGOUjdGwxvxK7s6', 'erhu00001@utb.vaxjo.se', '2019-04-24 09:44:09', '23596e7da9bcaaf2701cf5fe847e49ed');
 
 -- --------------------------------------------------------
 
@@ -144,7 +144,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `elorating`) VALUES
 (2, 'Göran', '123', 'göran.go@a.b', 1200),
 (3, 'Mange', '123', 'mamama@kk.lll', 1200),
 (4, 'Janne', '123', 'jan.jan@unibet.com', 1865),
-(5, 'Berit', '123', 'berit@koko.se', 2031);
+(5, 'Berit', '123', 'berit@koko.se', 2031),
+(9, 'Adrian', '$2y$10$wxBQoNtI9TDcSZ9EUehvUuoNSwxHAyzm9sW91YANA1sRDs.ETQ2va', 'adkl00001@utb.vaxjo.se', 1200);
 
 --
 -- Index för dumpade tabeller
@@ -230,7 +231,7 @@ ALTER TABLE `games`
 -- AUTO_INCREMENT för tabell `nonactivatedusers`
 --
 ALTER TABLE `nonactivatedusers`
-  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT för tabell `savedgames`
@@ -242,7 +243,7 @@ ALTER TABLE `savedgames`
 -- AUTO_INCREMENT för tabell `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Restriktioner för dumpade tabeller

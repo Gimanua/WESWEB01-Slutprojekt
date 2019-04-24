@@ -10,18 +10,41 @@ session_start();
 
 function Validate($dbh, $token)
 {
-	$sql = "SELECT * FROM `nonactivatedusers` WHERE token = ?";
+	$sql = "SELECT * FROM `nonactivatedusers` WHERE token = ? LIMIT 1";
 	$stmt = $dbh->prepare($sql);
 	$stmt->execute([$token]);
 	if($row = $stmt->fetch())
 	{
-		if(date('Y-m-d H:i:s', time()) < $row['activationvalid'])
+		if(date('Y-m-d H:i:s', time()) <= $row['activationvalid'])
 		{
+			//Man är i tid
+			//Skapa användaren i 'users'
+			$sql = "INSERT INTO `users` (`id`, `username`, `password`, `email`, `elorating`) VALUES (NULL, :username, :password, :email, '1200')";
+			$stmt = $dbh->prepare($sql);
+			$success = $stmt->execute(['username' => $row['username'], 'password' => $row['password'], 'email' => $row['email']]);
+			
+			//Kolla om man lyckades
+			if(!$success)
+			{
+				echo "Misslyckades att skapa användare.";
+				return;
+			}
+			echo "Lyckades att skapa användare.";
+			
+			//Ta bort användaren från 'nonactivatedusers'
+			$sql = "DELETE FROM `nonactivatedusers` WHERE token = ?";
+			$stmt = $dbh->prepare($sql);
+			$stmt->execute([$token]); //Användaren behöver inte veta om detta lyckades eller ej
 			
 		}
 		else
 		{
-			
+			echo "Tiden har tyvärr gått ut. Du behöver registrera dig igen.";
+			//Det har gått mer än 15 minuter
+			//Ta bort användaren från 'nonactivatedusers'
+			$sql = "DELETE FROM `nonactivatedusers` WHERE token = ?";
+			$stmt = $dbh->prepare($sql);
+			$stmt->execute([$token]); //Användaren behöver inte veta om detta lyckades eller ej
 		}
 	}
 }
@@ -53,6 +76,7 @@ function Login($dbh, $username, $password)
 	if(password_verify($password, $hashedPassword))
 	{
 		echo "Inloggningen lyckades";
+		$_SESSION['username'] = $username;
 	}
 	else
 	{
@@ -112,7 +136,7 @@ function Register($dbh, $username, $password, $email)
 	{
 		echo "Registreringen lyckades, du har nu 15 minuter på dig att bekräfta kontot med en länk som skickats till din email.";
 		
-		if(mail($email, "Activation", "Klicka på länken slutföra kontoregistreringen: http://localhost/login.php?intent=validate?token={$token}"))
+		if(mail($email, "Activation", "Klicka på länken slutföra kontoregistreringen: http://localhost/login.php?intent=validate&token={$token}"))
 			echo "Mail skickat";
 		else
 			echo "Misslyckades med att skicka mail";
@@ -124,6 +148,7 @@ function Register($dbh, $username, $password, $email)
 
 if(isset($_GET['intent']))
 {
+	echo "<p>";
 	switch($_GET['intent'])
 	{	
 		case 'login':
@@ -136,9 +161,10 @@ if(isset($_GET['intent']))
 			break;
 		case 'validate':
 			if(!empty($_GET['token']))
-				Validate($dbh, $_GET['token'])
+				Validate($dbh, $_GET['token']);
 			break;
 	}
+	echo "</p>";
 }
 
 //Logga in-formulär
