@@ -1,5 +1,4 @@
 <?php
-//secret q!y?^}BA:5#(\!+f~:}9$j;>Q'BE6a&UPQG#r2J{Rn<.A8<fnz:($_N*2;D5"_9h
 require "../Private/connection.php";
 
 //Template för 'Tillbaka till huvudsidan'
@@ -19,7 +18,7 @@ function Validate($dbh, $token)
 		{
 			//Man är i tid
 			//Skapa användaren i 'users'
-			$sql = "INSERT INTO `users` (`id`, `username`, `password`, `email`, `elorating`) VALUES (NULL, :username, :password, :email, '1200')";
+			$sql = "INSERT INTO `users` (`id`, `username`, `password`, `email`, `elorating`, `passwordresettoken`) VALUES (NULL, :username, :password, :email, '1200', '')";
 			$stmt = $dbh->prepare($sql);
 			$success = $stmt->execute(['username' => $row['username'], 'password' => $row['password'], 'email' => $row['email']]);
 			
@@ -78,9 +77,10 @@ function Login($dbh, $username, $password)
 	
 	if(password_verify($password, $hashedPassword))
 	{
-		echo "Inloggningen lyckades";
 		$_SESSION['username'] = $username;
 		$_SESSION['userid'] = $userid;
+		header("Location: index.php");
+		die();
 	}
 	else
 	{
@@ -140,7 +140,7 @@ function Register($dbh, $username, $password, $email)
 	{
 		echo "Registreringen lyckades, du har nu 15 minuter på dig att bekräfta kontot med en länk som skickats till din email.";
 		
-		if(mail($email, "Activation", "Klicka på länken slutföra kontoregistreringen: http://localhost/login.php?intent=validate&token={$token}"))
+		if(mail($email, "Aktivering", "Klicka på länken slutföra kontoregistreringen: http://localhost/login.php?intent=validate&token={$token}"))
 			echo "Mail skickat";
 		else
 			echo "Misslyckades med att skicka mail";
@@ -148,6 +148,28 @@ function Register($dbh, $username, $password, $email)
 	else
 		echo "Registreringen misslyckades!";
 	
+}
+
+function SetPassword($dbh, $newPassword, $token){
+	$hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+	$sql = "UPDATE `users` SET `password` = :password WHERE `users`.`passwordresettoken` = :token";
+	$stmt = $dbh->prepare($sql);
+	$success = $stmt->execute(['password' => $hashedPassword, 'token' => $token]);
+	if($success)
+		echo "Nytt lösenord är satt.";
+}
+
+function ResetPassword($dbh, $email){
+
+	$passwordresettoken = md5($email.time());
+	$sql = "UPDATE `users` SET `passwordresettoken` = :passwordresettoken WHERE `users`.`email` = :email LIMIT 1";
+	$stmt = $dbh->prepare($sql);
+	$stmt->execute(['passwordresettoken' => $passwordresettoken, 'email' => $email]);
+	
+	if(mail($email, "Återställning av lösenord", "Klicka på länken för att återställa ditt lösenord: http://localhost/login.php?intent=enter-new-password&token={$passwordresettoken}"))
+		echo "Mail skickat";
+	else
+		echo "Misslyckades med att skicka mail";
 }
 
 if(isset($_GET['intent']))
@@ -166,6 +188,14 @@ if(isset($_GET['intent']))
 		case 'validate':
 			if(!empty($_GET['token']))
 				Validate($dbh, $_GET['token']);
+			break;
+		case 'password-reset':
+			if(!empty($_POST['email']))
+				ResetPassword($dbh, $_POST['email']);
+			break;
+		case 'set-password':
+			if(!empty($_POST['token']) && !empty($_POST['password']))
+				SetPassword($dbh, $_POST['password'], $_POST['token']);
 			break;
 	}
 	echo "</p>";
@@ -186,25 +216,45 @@ if(isset($_GET['intent']))
 
 <body>
 	<a href="index.php">Tillbaka till huvudsidan</a>
-	<p>Logga in</p>
-	<form method="post" action="login.php?intent=login">
-		<label for="username">Användarnamn</label><br>
-		<input type="text" name="username" required /><br>
-		<label for="password">Lösenord</label><br>
-		<input type="password" name="password" required /><br>
-		<input type="submit" value="Logga In" />
-	</form>
-	<!--Glömt lösenord?-->
-	<p>Registrera</p>
-	<form method="post" action="login.php?intent=register">
-		<label for="username">Användarnamn</label><br>
-		<input type="text" name="username" required /><br>
-		<label for="password">Lösenord</label><br>
-		<input type="password" name="password" required /><br>
-		<label for="email">Email</label><br>
-		<input type="text" name="email" required /><br>
-		<input type="submit" value="Registrera" />
-	</form>
+	<?php
+		if(isset($_GET['intent']) && $_GET['intent'] === 'enter-new-password' && isset($_GET['token'])){
+			echo "<p>Formulär för återställande av lösenord</p>
+				<form method=\"post\" action=\"login.php?intent=set-password\">
+					<label for=\"password\">Nytt lösenord</label><br>
+					<input type=\"password\" name=\"password\" required /><br>
+					<input type=\"hidden\" name=\"token\" value=\"{$_GET['token']}\" />
+					<input type=\"submit\" value=\"Byt lösenord\" />
+				</form>";
+		}
+		else{
+			echo <<<STANDARD
+				<p>Logga in</p>
+				<form method="post" action="login.php?intent=login">
+					<label for="username">Användarnamn</label><br>
+					<input type="text" name="username" required /><br>
+					<label for="password">Lösenord</label><br>
+					<input type="password" name="password" required /><br>
+					<input type="submit" value="Logga In" />
+				</form>
+				<p>Glömt lösenord?</p>
+				<form method="post" action="login.php?intent=password-reset">
+					<label for="email">Email-address för kontot</label><br>
+					<input type="text" name="email" required /><br>
+					<input type="submit" value="Skicka mail" />
+				</form>
+				<p>Registrera</p>
+				<form method="post" action="login.php?intent=register">
+					<label for="username">Användarnamn</label><br>
+					<input type="text" name="username" required /><br>
+					<label for="password">Lösenord</label><br>
+					<input type="password" name="password" required /><br>
+					<label for="email">Email</label><br>
+					<input type="text" name="email" required /><br>
+					<input type="submit" value="Registrera" />
+				</form>
+STANDARD;
+		}
+	?>
 </body>
 
 </html>

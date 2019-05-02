@@ -22,7 +22,7 @@ else
 <body>
 	<?php
 	if($loggedIn){
-		//Kolla om man är admin
+		//TODO Kolla om man är admin
 		$htmlUsername = htmlspecialchars($_SESSION['username']);
 		echo "<p class=\"userinfo\">Inloggad som: <a href=\"http://localhost/account.php\">{$htmlUsername}</a></p>";
 		echo '<p class="userinfo"><a href="http://localhost/manage-challenges.php">Hantera utmaningar</a></p>';

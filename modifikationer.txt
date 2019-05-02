@@ -3,6 +3,7 @@ Korrektioner
 [Users]
 - 'Password', VARCHAR, 255
 - 'Email', VARCHAR, 64
+- 'passwordresettoken', VARCHAR, 64, UNIQUE
 
 [Games]
 - 'Fen', VARCHAR, 128
