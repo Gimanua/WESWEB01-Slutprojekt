@@ -5,9 +5,17 @@ require "../Private/connection.php";
 if(!$dbh)
 	die();
 
-if(!isset($_GET['gameid'])){
-	header("Location: index.php");
+if(!isset($_SESSION['username']) || !isset($_SESSION['userid'])){
+	header("Location: login.php");
 	die();
+}
+
+function ActiveColor($fen){
+	$activeColor = substr($fen, strpos($fen, " ") + 1, 1);
+	if($activeColor == 'b')
+		return 'black';
+	else
+		return 'white';
 }
 
 function EchoGame($dbh){
@@ -17,9 +25,18 @@ function EchoGame($dbh){
 	if(!$success)
 		die("Partiet finns inte.");
 	
+	$userColor;
 	$game = $stmt->fetch();
-	if($game['private'])
-		die("Partiet är privat.");
+	if($game['whiteuserid'] == $_SESSION['userid']){
+		$userColor = 'white';
+	}
+	elseif($game['blackuserid'] == $_SESSION['userid']){
+		$userColor = 'black';
+	}
+	else{
+		die("Du är inte en deltagare av partiet.");
+	}
+		
 	
 	$whiteUserName;
 	$whiteEloRating;
@@ -51,14 +68,23 @@ function EchoGame($dbh){
 	$htmlReadyBlackUserName = htmlspecialchars($blackUserName);
 	$htmlReadyBlackEloRating = htmlspecialchars($blackEloRating);
 	
+	$whosTurn = 'motståndarens';
+	$activeColor = ActiveColor($game['fen']);
+	if($activeColor == $userColor){
+		$whosTurn = 'ditt';
+		//Formulär ska finnas
+	}
+	
 	echo "
 	<div>
 		<img src=\"{$htmlReadyImageURL}\" alt=\"{$htmlReadyFEN}\" />
 		<p>{$htmlReadyPGN}</p>
+		<p>Det är {$whosTurn} drag.</p>
 		<p>{$htmlReadyWhiteUserName} ({$htmlReadyWhiteEloRating}) VS {$htmlReadyBlackUserName} ({$htmlReadyBlackEloRating})</p>
 		<a href=\"\">Spara partiet</a>
 	</div>";
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="sv">
