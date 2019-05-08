@@ -5,6 +5,7 @@ require "../Private/connection.php";
 if(!$dbh)
 	die();
 
+session_start();
 if(!isset($_SESSION['username']) || !isset($_SESSION['userid'])){
 	header("Location: login.php");
 	die();

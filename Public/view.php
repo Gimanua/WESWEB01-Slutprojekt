@@ -5,9 +5,28 @@ require "../Private/connection.php";
 if(!$dbh)
 	die();
 
+session_start();
 if(!isset($_GET['gameid'])){
 	header("Location: index.php");
 	die();
+}
+
+if(isset($_GET['intent']) && $_GET['intent'] == 'save'){
+	
+	if(!isset($_SESSION['username']) || !isset($_SESSION['userid'])){
+		//header("Location: login.php");
+		die("username = ".$_SESSION['username']." | userid = ".$_SESSION['userid']);
+	}
+	
+	$sql = "INSERT INTO `savedgames` (`userid`, `gameid`) VALUES (?, ?)";
+	$stmt = $dbh->prepare($sql);
+	$success = $stmt->execute([$_SESSION['userid'], $_GET['gameid']]);
+	if($success){
+		echo "<p>Partiet sparades!</p>";
+	}
+	else{
+		echo "<p>Partiet kunde inte sparas av okänd anledning.</p>";
+	}
 }
 
 function EchoGame($dbh){
@@ -55,8 +74,8 @@ function EchoGame($dbh){
 	<div>
 		<img src=\"{$htmlReadyImageURL}\" alt=\"{$htmlReadyFEN}\" />
 		<p>{$htmlReadyPGN}</p>
-		<p>{$htmlReadyWhiteUserName} ({$htmlReadyWhiteEloRating}) VS {$htmlReadyBlackUserName} ({$htmlReadyBlackEloRating})</p>
-		<a href=\"\">Spara partiet</a>
+		<p>{$htmlReadyWhiteUserName} (ELO {$htmlReadyWhiteEloRating}) VS {$htmlReadyBlackUserName} (ELO {$htmlReadyBlackEloRating})</p>
+		<a href=\"view.php?intent=save&gameid={$_GET['gameid']}\">Spara partiet</a>
 	</div>";
 }
 ?>
