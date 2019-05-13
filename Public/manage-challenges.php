@@ -55,6 +55,58 @@ if(isset($_GET['intent']) && $_GET['intent'] == 'decline' && !empty($_GET['chall
 		echo "<p>Utmaningen kunde inte nekas.</p>";
 }
 
+if(isset($_GET['intent']) && $_GET['intent'] == 'accept' && !empty($_GET['challengeid'])){
+	
+	//Kolla om utmaningen var privat eller inte
+	$sql = "SELECT senderuserid, receiveruserid, private FROM challenges WHERE id=?";
+	$stmt = $dbh->prepare($sql);
+	$success = $stmt->execute([$_GET['challengeid']]);
+	$challenge = $stmt->fetch();
+	
+	$private = $challenge['private'];
+	$senderuserid = $challenge['senderuserid'];
+	$receiveruserid = $challenge['receiveruserid'];
+	
+	//Beräkna median-elorating av spelarna
+	$sql = "SELECT elorating FROM users WHERE id=?";
+	$stmt = $dbh->prepare($sql);
+	$success = $stmt->execute([$senderuserid]);
+	$senderElo = $stmt->fetchColumn();
+	
+	$sql = "SELECT elorating FROM users WHERE id=?";
+	$stmt = $dbh->prepare($sql);
+	$success = $stmt->execute([$receiveruserid]);
+	$receiverElo = $stmt->fetchColumn();
+	
+	$averegeElo = ($senderElo + $receiverElo) / 2;
+	
+	$sql = "INSERT INTO `games` (`fen`, `imageurl`, `private`, `blackuserid`, `whiteuserid`, `averageelorating`) VALUES (:fen, :imageurl, :private, :blackuserid, :whiteuserid, :averageelorating)";
+	$stmt = $dbh->prepare($sql);
+	$standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	$imageUrl = "http://www.fen-to-image.com/image/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR%20w%20KQkq%20-%200%201";
+	
+	$blackuserid;
+	$whiteuserid;
+	
+	//Slumpa vem som blir vit och vem som blir svart
+	if(rand(1,2) == 1){
+		$blackuserid = $senderuserid;
+		$whiteuserid = $receiveruserid;
+	}
+	else{
+		$blackuserid = $receiveruserid;
+		$whiteuserid = $senderuserid;
+	}
+	
+	//Acceptera utmaningen
+	$success = $stmt->execute(['fen' => $standardFen, 'imageurl' => $imageUrl, 'private' => $private, 'blackuserid' => $blackuserid, 'whiteuserid' => $whiteuserid, 'averageelorating' => $averegeElo]);
+	
+	//Ta bort utmaningen
+	$sql = "DELETE FROM `challenges` WHERE `challenges`.`id` = ?";
+	$stmt = $dbh->prepare($sql);
+	$success = $stmt->execute([$_GET['challengeid']]);
+}
+
 function EchoPendingChallenges($dbh){
 	
 	//Inkommande

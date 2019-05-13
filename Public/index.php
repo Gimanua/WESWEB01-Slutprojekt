@@ -72,7 +72,7 @@ else
 	if($loggedIn)
 	{
 		echo '<p>Mina pågående partier:</p>';
-		$sql = "SELECT fen, imageurl, blackuserid, whiteuserid FROM games WHERE whiteuserid = ? OR blackuserid = ?";
+		$sql = "SELECT * FROM games WHERE whiteuserid = ? OR blackuserid = ?";
 		$stmt = $dbh->prepare($sql);
 		$stmt->execute([$_SESSION['userid'], $_SESSION['userid']]);
 		$games = $stmt->fetchAll();
@@ -94,7 +94,7 @@ else
 			
 			echo '<p>'.htmlspecialchars($whitePlayer['username']).' (ELO '.htmlspecialchars($whitePlayer['elorating']).
 			') VS '.htmlspecialchars($blackPlayer['username']).' (ELO '.htmlspecialchars($blackPlayer['elorating']).')</p>';
-			echo '<p class="play"><a href="">Spela</a></p>';
+			echo "<p class=\"play\"><a href=\"play.php?gameid={$row['id']}\">Spela</a></p>";
 			
 			echo '</div>';
 		}

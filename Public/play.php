@@ -11,6 +11,41 @@ if(!isset($_SESSION['username']) || !isset($_SESSION['userid'])){
 	die();
 }
 
+if(isset($_GET['intent']) && $_GET['intent'] == 'submitmove' && !empty($_POST['move'])){
+	$move = $_POST['move'];
+	$newFen = GetFen();
+}
+
+function GetFen($oldFen, $move){
+	$from = substr($move, 0, 2);
+	$to = substr($move, 3, 2);
+	
+	$rank = 0;
+	$column = 0;
+	$chessBoard = [ 0 => [], 1 => [], 2 => [], 3 => [], 4 => [], 5 => [], 6 => [], 7 => [] ];
+	for($i = 0; $i < strlen($oldFen); $i++){
+		$char = substr($oldFen, $i, 1);
+		if($char == ' '){
+			break;
+		}
+		else if($char == '/'){
+			$rank++;
+			$column = 0;
+		}
+		else if(is_numeric($char)){
+			for($x = 0; $x < (int)$char; $x++){
+				$chessBoard[$rank][$x] = ' ';
+			}
+		}
+		else{
+			$chessBoard[$rank][$column] = $char;
+			$column++;
+		}
+	}
+	
+	
+}
+
 function ActiveColor($fen){
 	$activeColor = substr($fen, strpos($fen, " ") + 1, 1);
 	if($activeColor == 'b')
@@ -18,6 +53,8 @@ function ActiveColor($fen){
 	else
 		return 'white';
 }
+
+function MovePiece
 
 function EchoGame($dbh){
 	$sql = "SELECT * FROM games WHERE id=?";
@@ -73,16 +110,25 @@ function EchoGame($dbh){
 	$activeColor = ActiveColor($game['fen']);
 	if($activeColor == $userColor){
 		$whosTurn = 'ditt';
-		//Formulär ska finnas
 	}
 	
 	echo "
 	<div>
 		<img src=\"{$htmlReadyImageURL}\" alt=\"{$htmlReadyFEN}\" />
 		<p>{$htmlReadyPGN}</p>
-		<p>Det är {$whosTurn} drag.</p>
-		<p>{$htmlReadyWhiteUserName} ({$htmlReadyWhiteEloRating}) VS {$htmlReadyBlackUserName} ({$htmlReadyBlackEloRating})</p>
-		<a href=\"\">Spara partiet</a>
+		<p>Det är {$whosTurn} drag.</p>";
+		
+	if($whosTurn == 'ditt'){
+		echo "
+			<form action=\"play.php?gameid={$_GET['gameid']}&intent=submitmove\" method=\"post\">
+				<label for=\"move\">Ditt drag i formatet XN:XN</label><br>
+				<input type=\"text\" name=\"move\" required /><br>
+				<input type=\"submit\" value=\"Flytta pjäs\" />
+			</form>
+		";
+	}
+		
+	echo "<p>{$htmlReadyWhiteUserName} ({$htmlReadyWhiteEloRating}) VS {$htmlReadyBlackUserName} ({$htmlReadyBlackEloRating})</p>
 	</div>";
 }
 
