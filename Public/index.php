@@ -34,7 +34,7 @@ else
 	?>
 	<p class="ongoing">Pågående partier</p>;
 	<?php
-	$sql = "SELECT FEN, ImageURL, BlackUserID, WhiteUserID FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
+	$sql = "SELECT * FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
 	$stmt = $dbh->query($sql);
 	if(!$stmt)
 		die();
@@ -45,22 +45,23 @@ else
 			break;
 		echo "<div>";
 		
-		$imageURL = htmlspecialchars($row['ImageURL']);
-		$fen = htmlspecialchars($row['FEN']);
+		$imageURL = htmlspecialchars($row['imageurl']);
+		$fen = htmlspecialchars($row['fen']);
 		echo "<img src=\"{$imageURL}\" alt=\"FEN-Sträng av partiet: {$fen}\"/>";
 		$sql = "SELECT Username, ELORating FROM Users WHERE ID=?";
 		
 		$playerstmt = $dbh->prepare($sql);
-		$playerstmt->execute([$row['WhiteUserID']]);
+		$playerstmt->execute([$row['whiteuserid']]);
 		$whitePlayer = $playerstmt->fetch();
 		
 		$playerstmt = $dbh->prepare($sql);
-		$playerstmt->execute([$row['BlackUserID']]);
+		$playerstmt->execute([$row['blackuserid']]);
 		$blackPlayer = $playerstmt->fetch();
 		
 		echo '<p>'.htmlspecialchars($whitePlayer['Username']).' (ELO '.htmlspecialchars($whitePlayer['ELORating']).
 		') VS '.htmlspecialchars($blackPlayer['Username']).' (ELO '.htmlspecialchars($blackPlayer['ELORating']).')</p>';
-		echo '<p class="watch"><a href="">Titta på</a></p>';
+		$htmlReadyGameID = htmlspecialchars($row['id']);
+		echo "<p class=\"watch\"><a href=\"view.php?gameid={$htmlReadyGameID}\">Titta på</a></p>";
 		
 		echo "</div>";
 		
@@ -71,7 +72,7 @@ else
 	if($loggedIn)
 	{
 		echo '<p>Mina pågående partier:</p>';
-		$sql = "SELECT fen, imageurl, blackuserid, whiteuserid FROM games WHERE whiteuserid = ? OR blackuserid = ?";
+		$sql = "SELECT * FROM games WHERE whiteuserid = ? OR blackuserid = ?";
 		$stmt = $dbh->prepare($sql);
 		$stmt->execute([$_SESSION['userid'], $_SESSION['userid']]);
 		$games = $stmt->fetchAll();
@@ -93,7 +94,7 @@ else
 			
 			echo '<p>'.htmlspecialchars($whitePlayer['username']).' (ELO '.htmlspecialchars($whitePlayer['elorating']).
 			') VS '.htmlspecialchars($blackPlayer['username']).' (ELO '.htmlspecialchars($blackPlayer['elorating']).')</p>';
-			echo '<p class="play"><a href="">Spela</a></p>';
+			echo "<p class=\"play\"><a href=\"play.php?gameid={$row['id']}\">Spela</a></p>";
 			
 			echo '</div>';
 		}

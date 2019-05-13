@@ -3,7 +3,7 @@ Korrektioner
 [Users]
 - 'Password', VARCHAR, 255
 - 'Email', VARCHAR, 64
-- 'passwordresettoken', VARCHAR, 64, UNIQUE
+- 'passwordresettoken', VARCHAR, 64 (Borde vara UNIQUE, men blev duplicate '')
 
 [Games]
 - 'Fen', VARCHAR, 128

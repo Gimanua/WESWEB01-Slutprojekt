@@ -1,5 +1,4 @@
 <?php
-
 require "../Private/connection.php";
 
 if(!$dbh)
