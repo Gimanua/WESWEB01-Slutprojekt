@@ -32,7 +32,7 @@ else
 		echo '<a href="login.php" class="login">Logga in / Registrera</a>';
 	}
 	?>
-	<p class="ongoing">Pågående partier</p>;
+	<p class="ongoing">Pågående partier:</p>
 	<?php
 	$sql = "SELECT * FROM Games WHERE Private=FALSE ORDER BY AverageELORating DESC";
 	$stmt = $dbh->query($sql);

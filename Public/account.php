@@ -10,6 +10,17 @@ if(!isset($_SESSION['username']) || !isset($_SESSION['userid'])){
 	die();
 }
 
+if(isset($_GET['intent']) && $_GET['intent'] == 'logout'){
+	session_start();
+    session_unset();
+    session_destroy();
+    session_write_close();
+    setcookie(session_name(),'',0,'/');
+    session_regenerate_id(true);
+	header("Location: login.php");
+	die();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -41,6 +52,9 @@ if(!isset($_SESSION['username']) || !isset($_SESSION['userid'])){
 		<label for="password">Nytt lösenord</label><br>
 		<input type="password" /><br>
 		<input type="submit" value="Ändra" />
+	</form>
+	<form method="post" action="account.php?intent=logout">
+		<input type="submit" value="Logga ut" />
 	</form>
 </body>
 
